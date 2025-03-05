@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import {useEffect, useState} from "react"
 import moment from 'moment'
 import {
   ColumnDef,
@@ -36,6 +36,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useAppDispatch } from "@/hooks/redux"
+import { buscarAgendamentosThunk } from "@/redux/reducers/agendamentos/thunks"
 
 const data: Payment[] = [
   {
@@ -168,13 +170,13 @@ export const columns: ColumnDef<Payment>[] = [
 ]
 
 export default function MeusAgendamentosPage() {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
     []
   )
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+    useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
 
   const table = useReactTable({
     data,
@@ -195,6 +197,17 @@ export default function MeusAgendamentosPage() {
     },
   })
 
+  const dispatch = useAppDispatch()
+  
+  useEffect(() => {
+    dispatch()
+    console.log("Buscando agendamentos...")
+  }, [dispatch])
+
+  const fetch = () => {
+    return buscarAgendamentosThunk()
+  }
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
@@ -206,6 +219,7 @@ export default function MeusAgendamentosPage() {
           }
           className="max-w-sm"
         />
+        <Button onClick={() => fetch()}>Fetch</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
