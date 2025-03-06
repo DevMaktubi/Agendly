@@ -1,3 +1,4 @@
+import { Agendamento, AgendamentoEmCriacao } from "@/types/Agendamentos";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const buscarAgendamentosThunk = createAsyncThunk(
@@ -43,6 +44,23 @@ export const buscarAgendamentosThunk = createAsyncThunk(
           },
           
         ]);
+      }, 2000);
+    });
+    return response
+  }
+)
+
+export const criarAgendamentoThunk = createAsyncThunk(
+  'agendamentos/criarAgendamento',
+  async (agendamento: AgendamentoEmCriacao) => {
+    const response = await new Promise<Agendamento>((resolve) => {
+      const novoAgendamento: Agendamento = {
+        ...agendamento, 
+        id: String(Math.floor(Math.random() * 1000)),
+        updated_at: new Date().toISOString()
+      }
+      setTimeout(() => {
+        resolve(novoAgendamento)
       }, 2000);
     });
     return response

@@ -1,17 +1,21 @@
-import { Agendamento } from "@/types/Agendamentos"
-import { createSlice } from "@reduxjs/toolkit"
-import { buscarAgendamentosThunk } from "./thunks"
+import { AcoesAgendamento, Agendamento } from "@/types/Agendamentos"
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { buscarAgendamentosThunk, criarAgendamentoThunk } from "./thunks"
+import { ACOES_AGENDAMENTO } from "@/lib/constants"
+
 
 export interface AgendamentosState {
   agendamentos: Agendamento[]
   status: "idle" | "loading" | "failed",
-  error: string | null
+  error: string | null,
+  acoesCarregando: AcoesAgendamento[]
 }
 
 const initialState: AgendamentosState = {
   agendamentos: [],
   status: "idle",
-  error: null
+  error: null,
+  acoesCarregando: []
 }
 
 export const agendamentosSlice = createSlice({
@@ -37,6 +41,13 @@ export const agendamentosSlice = createSlice({
     builder.addCase(buscarAgendamentosThunk.rejected, (state) => {
       state.status = "failed",
       state.error = "Erro ao buscar os agendamentos"
+    })
+    builder.addCase(criarAgendamentoThunk.pending, (state) => {
+      state.acoesCarregando.push(ACOES_AGENDAMENTO.CRIAR)
+    })
+    builder.addCase(criarAgendamentoThunk.fulfilled, (state, action) => {
+      state.agendamentos.push(action.payload)
+      state.acoesCarregando = state.acoesCarregando.filter(acao => acao !== ACOES_AGENDAMENTO.CRIAR)
     })
   }
 })
