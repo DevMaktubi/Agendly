@@ -1,5 +1,3 @@
-import { AppThunk } from "@/redux/store";
-import { buscarAgendamentos } from "./agendamentosSlice";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const buscarAgendamentosThunk = createAsyncThunk(
@@ -47,7 +45,6 @@ export const buscarAgendamentosThunk = createAsyncThunk(
         ]);
       }, 2000);
     });
-    // The value we return becomes the `fulfilled` action payload
     return response
   }
 )

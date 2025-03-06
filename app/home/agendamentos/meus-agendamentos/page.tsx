@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import {useEffect, useState} from "react"
-import moment from 'moment'
+import { useEffect, useState } from "react";
+import moment from "moment";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,11 +13,11 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -26,8 +26,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -35,49 +35,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { useAppDispatch } from "@/hooks/redux"
-import { buscarAgendamentosThunk } from "@/redux/reducers/agendamentos/thunks"
-
-const data: Payment[] = [
-  {
-    id: "m5gr84i9",
-    type: "Corte de cabelo",
-    date: "2023-05-12",
-    updated_at: "2023-05-12",
-  },
-  {
-    id: "3u1reuv4",
-    date: "2023-06-23",
-    updated_at: "2023-06-23",
-    type: "Barba"
-  },
-  {
-    id: "derv1ws0",
-    date: "2023-07-14",
-    updated_at: "2023-07-14",
-    type: "Hidratação"
-  },
-  {
-    id: "5kma53ae",
-    date: "2023-08-01",
-    updated_at: "2023-08-01",
-    type: "Coloração"
-  },
-  {
-    id: "bhqecj4p",
-    date: "2023-09-18",
-    updated_at: "2023-09-19",
-    type: "Penteado"
-  },
-]
+} from "@/components/ui/table";
+import { useAppDispatch } from "@/hooks/redux";
+import { buscarAgendamentosThunk } from "@/redux/reducers/agendamentos/thunks";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectAgendamentos,
+  selectAgendamentosStatus,
+} from "@/redux/reducers/agendamentos/selectors";
 
 export type Payment = {
-  id: string
-  type: string
-  date: string
-  updated_at: string
-}
+  id: string;
+  type: string;
+  date: string;
+  updated_at: string;
+};
 
 export const columns: ColumnDef<Payment>[] = [
   {
@@ -105,9 +77,7 @@ export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "type",
     header: "Serviço",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("type")}</div>
-    ),
+    cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
   },
   {
     accessorKey: "date",
@@ -120,7 +90,7 @@ export const columns: ColumnDef<Payment>[] = [
           Data
           <ArrowUpDown />
         </Button>
-      )
+      );
     },
     cell: ({ row }) => <div className="lowercase">{row.getValue("date")}</div>,
   },
@@ -135,15 +105,17 @@ export const columns: ColumnDef<Payment>[] = [
           Última atualização
           <ArrowUpDown />
         </Button>
-      )
+      );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("updated_at")}</div>,
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("updated_at")}</div>
+    ),
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const payment = row.original
+      const payment = row.original;
 
       return (
         <DropdownMenu>
@@ -164,22 +136,32 @@ export const columns: ColumnDef<Payment>[] = [
             <DropdownMenuItem>Ver detalhes do agendamento</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )
+      );
     },
   },
-]
+];
 
 export default function MeusAgendamentosPage() {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = useState({})
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+
+  const dispatch = useAppDispatch();
+
+  const statusAgendamentos = useSelector(selectAgendamentosStatus);
+  const agendamentos = useSelector(selectAgendamentos);
+
+  const carregarAgendamentos = () => {
+    dispatch(buscarAgendamentosThunk());
+  };
+
+  useEffect(() => {
+    carregarAgendamentos();
+  }, []);
 
   const table = useReactTable({
-    data,
+    data: agendamentos,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -195,18 +177,7 @@ export default function MeusAgendamentosPage() {
       columnVisibility,
       rowSelection,
     },
-  })
-
-  const dispatch = useAppDispatch()
-  
-  useEffect(() => {
-    dispatch()
-    console.log("Buscando agendamentos...")
-  }, [dispatch])
-
-  const fetch = () => {
-    return buscarAgendamentosThunk()
-  }
+  });
 
   return (
     <div className="w-full">
@@ -219,10 +190,14 @@ export default function MeusAgendamentosPage() {
           }
           className="max-w-sm"
         />
-        <Button onClick={() => fetch()}>Fetch</Button>
+        <Button onClick={() => carregarAgendamentos()}>Carregar</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              variant="outline"
+              className="ml-auto"
+              disabled={statusAgendamentos !== "idle"}
+            >
               Colunas ativas <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
@@ -242,7 +217,7 @@ export default function MeusAgendamentosPage() {
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
+                );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -262,47 +237,73 @@ export default function MeusAgendamentosPage() {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    if(cell.column.id === "date" || cell.column.id === "updated_at") {
-                      return (
-                        <TableCell key={cell.id}>
-                          {moment(row.getValue(cell.column.id) as string).format("DD/MM/YYYY")}
-                        </TableCell>
-                      )
-                    }
-                    return (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    )
-                  })}
-                </TableRow>
-              ))
-            ) : (
+            {statusAgendamentos === "loading" && (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Loading...
                 </TableCell>
               </TableRow>
             )}
+            {statusAgendamentos === "failed" && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  Failed to load data.
+                </TableCell>
+              </TableRow>
+            )}
+            {statusAgendamentos === "idle" &&
+              (table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      if (
+                        cell.column.id === "date" ||
+                        cell.column.id === "updated_at"
+                      ) {
+                        return (
+                          <TableCell key={cell.id}>
+                            {moment(
+                              row.getValue(cell.column.id) as string
+                            ).format("DD/MM/YYYY")}
+                          </TableCell>
+                        );
+                      }
+                      return (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>
@@ -331,5 +332,5 @@ export default function MeusAgendamentosPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
